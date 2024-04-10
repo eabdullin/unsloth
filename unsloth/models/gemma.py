@@ -87,13 +87,13 @@ def GemmaDecoderLayer_fast_forward(
             use_cache=use_cache,
             padding_mask=padding_mask,
         )
-        hidden_states += residual
+        hidden_states = residual + hidden_states
 
         # Fully Connected
         residual = hidden_states
         hidden_states = fast_rms_layernorm_inference_gemma(self.post_attention_layernorm, hidden_states, out_weight)
         hidden_states = fast_geglu_inference(self.mlp, hidden_states)
-        hidden_states += residual
+        hidden_states = residual + hidden_states
     else:
         residual = hidden_states
         hidden_states = fast_rms_layernorm(self.input_layernorm, hidden_states, gemma = True)
