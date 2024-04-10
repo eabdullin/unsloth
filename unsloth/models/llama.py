@@ -1015,6 +1015,7 @@ class FastLlamaModel:
         model_patcher  = None,
         tokenizer_name = None,
         trust_remote_code = False,
+        peft_mode_name = None,
         **kwargs,
     ):
         if model_patcher is None: model_patcher = FastLlamaModel
