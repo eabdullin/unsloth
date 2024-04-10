@@ -67,6 +67,8 @@ class FastLanguageModel(FastLlamaModel):
     @staticmethod
     def from_pretrained(
         model_name     = "unsloth/mistral-7b-bnb-4bit",
+        peft_mode_name = None,
+        tokenizer_name = None,
         max_seq_length = 4096,
         dtype          = None,
         load_in_4bit   = True,
@@ -85,7 +87,7 @@ class FastLanguageModel(FastLlamaModel):
         is_peft = False
         try:
             model_config = AutoConfig.from_pretrained(model_name, token = token)
-            is_peft = False
+            is_peft = peft_mode_name is not None
         except:
             try:
                 # Most likely a PEFT model
@@ -94,6 +96,7 @@ class FastLanguageModel(FastLlamaModel):
                 raise RuntimeError(f"Unsloth: `{model_name}` is not a full model or a PEFT model.")
             
             # Check base model again for PEFT
+            peft_mode_name = model_name
             model_name = _get_model_name(peft_config.base_model_name_or_path, load_in_4bit)
             model_config = AutoConfig.from_pretrained(model_name, token = token)
             is_peft = True
@@ -120,13 +123,14 @@ class FastLanguageModel(FastLlamaModel):
         pass
 
         # Check if this is local model since the tokenizer gets overwritten
-        if  os.path.exists(os.path.join(old_model_name, "tokenizer_config.json")) and \
-            os.path.exists(os.path.join(old_model_name, "tokenizer.json")) and \
-            os.path.exists(os.path.join(old_model_name, "special_tokens_map.json")):
+        if tokenizer_name is None:
+            if  os.path.exists(os.path.join(old_model_name, "tokenizer_config.json")) and \
+                os.path.exists(os.path.join(old_model_name, "tokenizer.json")) and \
+                os.path.exists(os.path.join(old_model_name, "special_tokens_map.json")):
 
-            tokenizer_name = old_model_name
-        else:
-            tokenizer_name = None
+                tokenizer_name = old_model_name
+            else:
+                tokenizer_name = None
         pass
 
         model, tokenizer = dispatch_model.from_pretrained(
