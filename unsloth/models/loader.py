@@ -67,7 +67,7 @@ class FastLanguageModel(FastLlamaModel):
     @staticmethod
     def from_pretrained(
         model_name     = "unsloth/mistral-7b-bnb-4bit",
-        peft_mode_name = None,
+        peft_model_name = None,
         tokenizer_name = None,
         max_seq_length = 4096,
         dtype          = None,
@@ -87,7 +87,7 @@ class FastLanguageModel(FastLlamaModel):
         is_peft = False
         try:
             model_config = AutoConfig.from_pretrained(model_name, token = token)
-            is_peft = peft_mode_name is not None
+            is_peft = peft_model_name is not None
         except:
             try:
                 # Most likely a PEFT model
@@ -96,7 +96,7 @@ class FastLanguageModel(FastLlamaModel):
                 raise RuntimeError(f"Unsloth: `{model_name}` is not a full model or a PEFT model.")
             
             # Check base model again for PEFT
-            peft_mode_name = model_name
+            peft_model_name = model_name
             model_name = _get_model_name(peft_config.base_model_name_or_path, load_in_4bit)
             model_config = AutoConfig.from_pretrained(model_name, token = token)
             is_peft = True
@@ -177,7 +177,7 @@ class FastLanguageModel(FastLlamaModel):
 
         if is_peft:
             # Now add PEFT adapters
-            model = PeftModel.from_pretrained(model, old_model_name, token = token)
+            model = PeftModel.from_pretrained(model, peft_model_name, token = token)
             # Patch it as well!
             model = dispatch_model.patch_peft_model(model, use_gradient_checkpointing)
         pass
