@@ -111,6 +111,7 @@ class FastLanguageModel(FastLlamaModel):
         model_type = model_config.model_type
 
         if   model_type == "llama":   dispatch_model = FastLlamaModel
+        elif model_type == "internlm2":   dispatch_model = FastLlamaModel
         elif model_type == "mistral": dispatch_model = FastMistralModel
         elif model_type == "gemma":
             if not SUPPORTS_GEMMA:
