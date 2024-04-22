@@ -327,7 +327,7 @@ def unsloth_save_model(
         if hasattr(model, "config"):
             print(f"Saved {save_method} model to https://huggingface.co/" + save_directory)
         pass
-        return save_directory
+        return save_directory, None
     pass
 
     # Tokenizer has different saving arguments
@@ -402,7 +402,7 @@ def unsloth_save_model(
         pass
 
         print(" Done.")
-        return save_directory
+        return save_directory, None
     pass
 
     # If push_to_hub, we must remove the .../ part of a repo
@@ -922,9 +922,16 @@ def save_to_gguf(
           f"The output location will be {final_location}\n"\
           "This will take 3 minutes...")
 
+    # We first check if tokenizer.model exists in the model_directory
+    if os.path.exists(f"{model_directory}/tokenizer.model"):
+        vocab_type = "hfft"
+    else:
+        vocab_type = "bpe"
+    pass
+
     if use_fast_convert:
         command = f"python llama.cpp/convert.py {model_directory} "\
-            f"--outfile {final_location} --vocab-type hfft "\
+            f"--outfile {final_location} --vocab-type {vocab_type} "\
             f"--outtype {first_conversion} --concurrency {n_cpus}"
     else:
         # Need to fix convert-hf-to-gguf.py for some models!

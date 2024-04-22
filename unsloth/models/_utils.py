@@ -148,12 +148,12 @@ def patch_tokenizer(model, tokenizer):
         model.config.update({"unsloth_version" : __version__})
     if not hasattr(tokenizer, "pad_token") or tokenizer.pad_token is None:
         # Fixes https://github.com/unslothai/unsloth/issues/5
-        if hasattr(tokenizer, "unk_token"):
+        if hasattr(tokenizer, "unk_token") and tokenizer.unk_token is not None:
             tokenizer.add_special_tokens({"pad_token" : tokenizer.unk_token})
             tokenizer.pad_token = tokenizer.unk_token
         else:
             name = model.config._name_or_path if model is not None else "Model"
-            logger.warning_one(
+            logger.warning_once(
                 f"{name} does not have a padding or unknown token!\n"\
                 f"Will use the EOS token of id {tokenizer.eos_token_id} as padding."
             )
@@ -349,3 +349,4 @@ class Unsloth_Offloaded_Gradient_Checkpointer(torch.autograd.Function):
         return (None, hidden_states.grad,) + (None,)*len(ctx.args)
     pass
 pass
+
