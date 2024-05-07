@@ -78,6 +78,7 @@ class FastLanguageModel(FastLlamaModel):
         fix_tokenizer  = True,
         trust_remote_code = False,
         use_gradient_checkpointing = True,
+        resize_model_vocab = None,
         *args, **kwargs,
     ):
         if token is None and "HF_TOKEN" in os.environ:
@@ -154,6 +155,9 @@ class FastLanguageModel(FastLlamaModel):
             trust_remote_code = trust_remote_code,
             *args, **kwargs,
         )
+        
+        if resize_model_vocab is not None:
+            model.resize_token_embeddings(resize_model_vocab)
 
         # In case the model supports tagging, add the unsloth tag.
         if hasattr(model, "add_model_tags"):
